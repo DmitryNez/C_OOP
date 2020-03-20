@@ -146,13 +146,7 @@ ostream& operator << (ostream& output, const tuple<Args...>& tuple_) {
     PrintTuple(output, tuple_, make_index_sequence<sizeof...(Args)>{});
     return output;
 }
-template<class... T>
-class A {
-public:
-    A(int a, int b) {
 
-    }
-};
 TEST(CSVParserTest, OpenFileTest) {
     std::ifstream input("data.txt");
     ASSERT_TRUE(input);
