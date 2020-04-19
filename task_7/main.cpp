@@ -1,21 +1,15 @@
 #include "view.h"
 #include <QApplication>
-#include<gtest/gtest.h>
-
+#include <QTest>
+#include "testview.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     view w;
     w.show();
-    //return a.exec();
-    ::testing::InitGoogleTest();
-    return RUN_ALL_TESTS();
-
-
+    QTest::qExec(new TestView, argc, argv);
+    return a.exec();
 }
 
-TEST(TestCase,TestName){
-    ASSERT_EQ(1,1);
-}
 
 

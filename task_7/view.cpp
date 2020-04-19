@@ -1,5 +1,4 @@
 #include "view.h"
-#include "ui_view.h"
 #include <QVector>
 
 view::view(QWidget *parent)
