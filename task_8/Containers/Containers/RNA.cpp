@@ -130,10 +130,8 @@ bool RNA::operator== (const RNA& rna) const {
 RNA operator+ (const RNA& r1, const RNA& r2) {
 
 	Nucleotide x, y;
-	size_t AmountOfNotEmptyCells = r1.size <= 16 ? 2 * (r1.size % r1.Size_tPerNucl) : (sizeof(size_t) * 8 - 2 * (r1.size % r1.Size_tPerNucl));
-
-	x = static_cast<Nucleotide>((r1.NuclArray[(r1.size - 1) / r1.Size_tPerNucl] >> AmountOfNotEmptyCells) & 3);
-	y = static_cast<Nucleotide>((r2.NuclArray[0] >> ((r2.size < 16) ? (sizeof(size_t) * 8 - 2 * r2.size) : 0)) & 3);
+	x = r1[r1.size - 1];
+	y = r2[0];
 
 	if ((x ^ 3) == y) {
 		RNA newRNA(r1);
@@ -197,9 +195,7 @@ size_t RNA::get_real_size() const {
 size_t RNA::cardinality(Nucleotide nucl) const {
 	size_t nucl_counter = 0, ContainerIndex = 0, nucleotid, step;
 	for (int i = 0; i < size; i++) {
-		ContainerIndex = i / Size_tPerNucl;
-		step = (ContainerIndex + 1) * sizeof(size_t) * 8 - (2 * i) % (sizeof(size_t) * 8) - 2;
-		nucleotid = (NuclArray[ContainerIndex] >> step) & 3;
+		nucleotid = this->operator[](i);
 		if (nucl == static_cast<Nucleotide>(nucleotid)) {
 			nucl_counter++;
 		}
