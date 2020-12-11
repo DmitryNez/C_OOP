@@ -48,7 +48,7 @@ public:
 			return *this;
 		}
 
-		typename HashMap<Key, Value, Hash, TAllocator>::node_type operator*() {
+		typename HashMap<Key, Value, Hash, TAllocator>::node_type& operator*() {
 			return *list_it;
 		}
 
