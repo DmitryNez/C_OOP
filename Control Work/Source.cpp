@@ -3,6 +3,8 @@
 #include <mutex>
 #include <vector>
 #include <thread>
+#include <atomic>
+#include <cassert>
 
 std::mutex lock;
 std::condition_variable cv;
@@ -90,9 +92,86 @@ public:
 		}
 	}
 };
+/*---------Singleton----------*/
+class Singleton {
+private:
+	static Singleton* singleton;
+public:
+	static Singleton* instance() {
+		static std::mutex mutex;
+		if (singleton == nullptr) {
+			std::unique_lock<std::mutex> lock(mutex);
+			if (singleton == nullptr)
+			{
+				singleton = new Singleton;
+			}
+		}
+		return singleton;
+	}
+};
+Singleton* Singleton::singleton = nullptr;
+
+/*--------------Singleton with memory barrier---------------*/
+class Singleton_ {
+private:
+	std::atomic<Singleton_*> singleton;
+	std::mutex mutex;
+public:
+	Singleton_* instance(){
+		Singleton_* tmp = singleton.load(std::memory_order_relaxed);
+		std::atomic_thread_fence(std::memory_order_acquire);
+		if (tmp == nullptr) {
+			std::lock_guard<std::mutex> lock(mutex);
+			tmp = singleton.load(std::memory_order_relaxed);
+			if (tmp == nullptr) {
+				tmp = new Singleton_;
+				std::atomic_thread_fence(std::memory_order_release);
+				singleton.store(tmp, std::memory_order_relaxed);
+			}
+		}
+		return tmp;
+	}
+};
 
 int main() {
 	MyThreadRAII thread(std::thread());
+Singleton_ OnlyOne;
+	Singleton_* s_;
+	Singleton_* v_;
+
+	std::thread worker3([&]()
+	{
+		s_ = OnlyOne.instance();
+	}
+	);
+	std::thread worker4([&]()
+	{
+		v_ = OnlyOne.instance();
+	}
+	);
+	worker3.join();
+	worker4.join();
+
+	assert(s_ == v_);
+
+	Singleton* s;
+	Singleton* v;
+
+	std::thread worker5([&]()
+	{
+		s = Singleton::instance();
+	}
+	);
+	std::thread worker6([&]()
+	{
+		v = Singleton::instance();
+	}
+	);
+
+	worker5.join();
+	worker6.join();
+
+	assert(s == v);
 
 	Car MyCar;
 	MyCar.SetFlag(0);
