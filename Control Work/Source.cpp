@@ -6,7 +6,7 @@
 
 std::mutex lock;
 std::condition_variable cv;
-
+/*-----------------Two workers----------------*/
 class Car {
 private:
 	bool flag; // 1 - car is painted; 0 - car is dryted
@@ -73,10 +73,27 @@ public:
 		}
 	}
 };
-
-
+/*-----------------MyThreadRAII----------------*/
+class MyThreadRAII {
+private:
+	std::thread thread;
+public:
+	MyThreadRAII(std::thread&& other_thread) {
+		thread = std::move(other_thread);
+	}
+	std::thread& GetThred() {
+		return thread;
+	}
+	~MyThreadRAII() {
+		if (thread.joinable()) {
+			thread.join();
+		}
+	}
+};
 
 int main() {
+	MyThreadRAII thread(std::thread());
+
 	Car MyCar;
 	MyCar.SetFlag(0);
 	Painter p(MyCar);
